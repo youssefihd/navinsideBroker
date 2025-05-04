@@ -1,5 +1,6 @@
 
 import { DataTable } from '@/components/common/DataTable';
+import { toast } from '@/components/ui/use-toast';
 
 interface Client {
   id: string;
@@ -62,12 +63,20 @@ const clientsColumns = [
 ];
 
 export default function Clients() {
+  const handleAddClient = () => {
+    toast({
+      title: "Nouveau client",
+      description: "Fonctionnalité à implémenter",
+    });
+  };
+
   return (
     <div className="space-y-6">
       <DataTable 
         data={clientsData} 
         columns={clientsColumns} 
         title="Clients" 
+        onAdd={handleAddClient}
       />
     </div>
   );

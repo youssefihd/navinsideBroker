@@ -1,5 +1,6 @@
 
 import { DataTable } from '@/components/common/DataTable';
+import { toast } from '@/components/ui/use-toast';
 
 interface Equipment {
   id: string;
@@ -79,12 +80,20 @@ const equipmentsColumns = [
 ];
 
 export default function Equipments() {
+  const handleAddEquipment = () => {
+    toast({
+      title: "Nouvel équipement",
+      description: "Fonctionnalité à implémenter",
+    });
+  };
+
   return (
     <div className="space-y-6">
       <DataTable 
         data={equipmentsData} 
         columns={equipmentsColumns} 
         title="Équipements" 
+        onAdd={handleAddEquipment}
       />
     </div>
   );

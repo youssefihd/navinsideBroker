@@ -1,7 +1,8 @@
 
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Plus, Search } from 'lucide-react';
 
 interface DataTableProps<T> {
   data: T[];
@@ -11,9 +12,10 @@ interface DataTableProps<T> {
     cell?: (item: T) => React.ReactNode;
   }[];
   title: string;
+  onAdd?: () => void;
 }
 
-export function DataTable<T>({ data, columns, title }: DataTableProps<T>) {
+export function DataTable<T>({ data, columns, title, onAdd }: DataTableProps<T>) {
   const [searchQuery, setSearchQuery] = useState('');
   
   const filteredData = data.filter((item) => {
@@ -26,15 +28,23 @@ export function DataTable<T>({ data, columns, title }: DataTableProps<T>) {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold tracking-tight">{title}</h2>
-        <div className="relative w-72">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Search..."
-            className="w-full pl-8"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+        <div className="flex items-center gap-3">
+          <div className="relative w-72">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Search..."
+              className="w-full pl-8"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          {onAdd && (
+            <Button onClick={onAdd} className="whitespace-nowrap">
+              <Plus className="mr-2 h-4 w-4" />
+              Add {title.slice(0, -1)}
+            </Button>
+          )}
         </div>
       </div>
       

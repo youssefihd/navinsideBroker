@@ -1,5 +1,7 @@
 
 import { DataTable } from '@/components/common/DataTable';
+import { StatusDistributionChart, Status } from '@/components/common/StatusDistributionChart';
+import { toast } from '@/components/ui/use-toast';
 
 // Types
 interface Load {
@@ -61,6 +63,16 @@ const loadsData: Load[] = [
   },
 ];
 
+// Map existing status to our Status enum
+const getStatusEnum = (status: string): Status => {
+  switch (status) {
+    case 'Planifié': return Status.Quoting;
+    case 'En cours': return Status.PickedUp;
+    case 'Livré': return Status.Delivered;
+    default: return Status.Confirmed;
+  }
+};
+
 // Colonnes pour le tableau de charges
 const loadsColumns = [
   { header: 'Référence', accessorKey: 'reference' as keyof Load },
@@ -88,14 +100,63 @@ const loadsColumns = [
   { header: 'Transporteur', accessorKey: 'carrier' as keyof Load },
 ];
 
+// Calculate status distribution
+const calculateStatusDistribution = () => {
+  const statusCounts: { [key in Status]: number } = {
+    [Status.Quoting]: 0,
+    [Status.Confirmed]: 0,
+    [Status.PickedUp]: 0,
+    [Status.Delivered]: 0
+  };
+  
+  loadsData.forEach(load => {
+    const status = getStatusEnum(load.status);
+    statusCounts[status] += 1;
+  });
+  
+  const statusColors = {
+    [Status.Quoting]: '#F2FCE2',   // Soft green
+    [Status.Confirmed]: '#FEC6A1', // Soft orange
+    [Status.PickedUp]: '#D3E4FD',  // Soft blue
+    [Status.Delivered]: '#FFDEE2'  // Soft pink
+  };
+  
+  return Object.entries(statusCounts).map(([status, count]) => ({
+    status: status as Status,
+    count,
+    color: statusColors[status as Status]
+  }));
+};
+
 export default function Loads() {
+  const statusDistribution = calculateStatusDistribution();
+  const totalLoads = loadsData.length;
+  
+  const handleAddLoad = () => {
+    toast({
+      title: "Nouvelle charge",
+      description: "Fonctionnalité à implémenter",
+    });
+  };
+  
   return (
     <div className="space-y-6">
-      <DataTable 
-        data={loadsData} 
-        columns={loadsColumns} 
-        title="Charges" 
-      />
+      <div className="grid gap-6 md:grid-cols-4">
+        <div className="md:col-span-3">
+          <DataTable 
+            data={loadsData} 
+            columns={loadsColumns} 
+            title="Charges" 
+            onAdd={handleAddLoad}
+          />
+        </div>
+        <div>
+          <StatusDistributionChart 
+            data={statusDistribution} 
+            total={totalLoads} 
+          />
+        </div>
+      </div>
     </div>
   );
 }

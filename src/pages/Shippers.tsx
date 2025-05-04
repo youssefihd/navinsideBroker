@@ -1,5 +1,6 @@
 
 import { DataTable } from '@/components/common/DataTable';
+import { toast } from '@/components/ui/use-toast';
 
 interface Shipper {
   id: string;
@@ -62,12 +63,20 @@ const shippersColumns = [
 ];
 
 export default function Shippers() {
+  const handleAddShipper = () => {
+    toast({
+      title: "Nouvel expéditeur",
+      description: "Fonctionnalité à implémenter",
+    });
+  };
+  
   return (
     <div className="space-y-6">
       <DataTable 
         data={shippersData} 
         columns={shippersColumns} 
         title="Expéditeurs" 
+        onAdd={handleAddShipper}
       />
     </div>
   );
