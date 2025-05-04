@@ -115,10 +115,10 @@ const calculateStatusDistribution = () => {
   });
   
   const statusColors = {
-    [Status.Quoting]: '#F2FCE2',   // Soft green
-    [Status.Confirmed]: '#FEC6A1', // Soft orange
-    [Status.PickedUp]: '#D3E4FD',  // Soft blue
-    [Status.Delivered]: '#FFDEE2'  // Soft pink
+    [Status.Quoting]: '#9b87f5',   // Purple
+    [Status.Confirmed]: '#F97316', // Bright Orange
+    [Status.PickedUp]: '#0EA5E9',  // Ocean Blue
+    [Status.Delivered]: '#10B981'  // Green
   };
   
   return Object.entries(statusCounts).map(([status, count]) => ({
