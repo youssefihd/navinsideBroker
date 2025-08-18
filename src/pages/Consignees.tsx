@@ -1,73 +1,89 @@
-
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import api from '@/lib/axios';
 import { DataTable } from '@/components/common/DataTable';
+import { toast } from '@/components/ui/use-toast';
+import { Button } from '@/components/ui/button';
+import { useTranslation } from 'react-i18next';
 
 interface Consignee {
-  id: string;
-  name: string;
+  id: number;
+  companyName: string;
   contact: string;
-  email: string;
-  phone: string;
   address: string;
+  postalCode: string;
+  province: string;
+  country: string;
+  city: string;
+  phoneNumber: string;
+  mcNumber: string;
 }
 
-const consigneesData: Consignee[] = [
-  {
-    id: '1',
-    name: 'Entrepôt Central',
-    contact: 'François Leclerc',
-    email: 'f.leclerc@entrepot-central.fr',
-    phone: '+33 1 11 22 33 44',
-    address: 'Paris, FR',
-  },
-  {
-    id: '2',
-    name: 'Distri Sud',
-    contact: 'Clara Martin',
-    email: 'c.martin@distri-sud.com',
-    phone: '+33 4 55 66 77 88',
-    address: 'Marseille, FR',
-  },
-  {
-    id: '3',
-    name: 'Logistique Est',
-    contact: 'Thierry Durand',
-    email: 't.durand@logistique-est.fr',
-    phone: '+33 3 99 88 77 66',
-    address: 'Strasbourg, FR',
-  },
-  {
-    id: '4',
-    name: 'Nord Distribution',
-    contact: 'Nathalie Petit',
-    email: 'n.petit@nord-distri.fr',
-    phone: '+33 3 12 23 34 45',
-    address: 'Lille, FR',
-  },
-  {
-    id: '5',
-    name: 'Centre Logistique Ouest',
-    contact: 'Paul Dubois',
-    email: 'p.dubois@clo-ouest.com',
-    phone: '+33 2 45 56 67 78',
-    address: 'Nantes, FR',
-  },
-];
-
-const consigneesColumns = [
-  { header: 'Nom', accessorKey: 'name' as keyof Consignee },
-  { header: 'Contact', accessorKey: 'contact' as keyof Consignee },
-  { header: 'Email', accessorKey: 'email' as keyof Consignee },
-  { header: 'Téléphone', accessorKey: 'phone' as keyof Consignee },
-  { header: 'Adresse', accessorKey: 'address' as keyof Consignee },
-];
-
 export default function Consignees() {
+  const [consignees, setConsignees] = useState<Consignee[]>([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+
+  useEffect(() => {
+    api.get('/consignees')
+      .then(res => setConsignees(res.data))
+      .catch(err => {
+        console.error('Erreur lors du chargement des destinataires:', err);
+        toast({
+          title: t('error'),
+          description: t('consignees_fetch_fail'),
+        });
+      })
+      .finally(() => setLoading(false));
+  }, [t]);
+
+  const columns = [
+    { header: t('companyName'), accessorKey: 'companyName' as keyof Consignee },
+    { header: t('contact'), accessorKey: 'contact' as keyof Consignee },
+    { header: t('address'), accessorKey: 'address' as keyof Consignee },
+    { header: t('postalCode'), accessorKey: 'postalCode' as keyof Consignee },
+    { header: t('city'), accessorKey: 'city' as keyof Consignee },
+    { header: t('province'), accessorKey: 'province' as keyof Consignee },
+    { header: t('country'), accessorKey: 'country' as keyof Consignee },
+    { header: t('phone'), accessorKey: 'phoneNumber' as keyof Consignee },
+    { header: t('mcnumber'), accessorKey: 'mcNumber' as keyof Consignee },
+    {
+      header: t('actions'),
+      accessorKey: 'actions' as any,
+      cell: (consignee: Consignee) => (
+        <div className="flex gap-2">
+          <Button size="sm" className="bg-blue-600 text-white" onClick={() => navigate(`/consignees/edit/${consignee.id}`)}>
+            {t('edit')}
+          </Button>
+          <Button
+            size="sm"
+            variant="destructive"
+            onClick={async () => {
+              try {
+                await api.delete(`/consignees/${consignee.id}`);
+                toast({ title: t('delete_success') });
+                setConsignees(consignees.filter(c => c.id !== consignee.id));
+              } catch {
+                toast({ title: t('error'), description: t('delete_fail') });
+              }
+            }}
+          >
+            {t('delete')}
+          </Button>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <div className="space-y-6">
-      <DataTable 
-        data={consigneesData} 
-        columns={consigneesColumns} 
-        title="Destinataires" 
+      <DataTable
+        data={consignees}
+        columns={columns}
+        title={t('consignees')}
+        isLoading={loading}
+        onAdd={() => navigate('/consignees/create')}
       />
     </div>
   );

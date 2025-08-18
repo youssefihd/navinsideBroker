@@ -9,7 +9,9 @@ export enum Status {
   Quoting = 'Quoting',
   Confirmed = 'Confirmed',
   PickedUp = 'PickedUp',
-  Delivered = 'Delivered'
+  Delivered = 'Delivered',
+  Lost = 'Lost',
+  Canceled = 'Canceled',
 }
 
 interface StatusDistribution {

@@ -1,99 +1,81 @@
-
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { DataTable } from '@/components/common/DataTable';
 import { toast } from '@/components/ui/use-toast';
+import { Button } from '@/components/ui/button';
+import api from '@/lib/axios';
+import { useTranslation } from 'react-i18next';
 
 interface Equipment {
-  id: string;
+  id: number;
   type: string;
-  identifier: string;
-  status: string;
-  location: string;
-  lastMaintenance: string;
 }
 
-const equipmentsData: Equipment[] = [
-  {
-    id: '1',
-    type: 'Remorque',
-    identifier: 'REM-001',
-    status: 'En service',
-    location: 'Paris',
-    lastMaintenance: '2025-04-15',
-  },
-  {
-    id: '2',
-    type: 'Conteneur',
-    identifier: 'CONT-A123',
-    status: 'Disponible',
-    location: 'Marseille',
-    lastMaintenance: '2025-03-22',
-  },
-  {
-    id: '3',
-    type: 'Remorque réfrigérée',
-    identifier: 'REMR-002',
-    status: 'En maintenance',
-    location: 'Lyon',
-    lastMaintenance: '2025-05-02',
-  },
-  {
-    id: '4',
-    type: 'Camion',
-    identifier: 'CAM-B456',
-    status: 'En service',
-    location: 'Lille',
-    lastMaintenance: '2025-04-10',
-  },
-  {
-    id: '5',
-    type: 'Conteneur',
-    identifier: 'CONT-C789',
-    status: 'Disponible',
-    location: 'Bordeaux',
-    lastMaintenance: '2025-04-28',
-  },
-];
-
-const equipmentsColumns = [
-  { header: 'Type', accessorKey: 'type' as keyof Equipment },
-  { header: 'Identifiant', accessorKey: 'identifier' as keyof Equipment },
-  { 
-    header: 'Statut', 
-    accessorKey: 'status' as keyof Equipment,
-    cell: (item: Equipment) => {
-      const statusClasses = {
-        'En service': 'bg-green-100 text-green-800',
-        'Disponible': 'bg-blue-100 text-blue-800',
-        'En maintenance': 'bg-orange-100 text-orange-800',
-      };
-      const statusClass = statusClasses[item.status as keyof typeof statusClasses] || 'bg-gray-100 text-gray-800';
-      
-      return (
-        <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusClass}`}>
-          {item.status}
-        </span>
-      );
-    }
-  },
-  { header: 'Localisation', accessorKey: 'location' as keyof Equipment },
-  { header: 'Dernière maintenance', accessorKey: 'lastMaintenance' as keyof Equipment },
-];
-
 export default function Equipments() {
-  const handleAddEquipment = () => {
-    toast({
-      title: "Nouvel équipement",
-      description: "Fonctionnalité à implémenter",
-    });
+  const [equipments, setEquipments] = useState<Equipment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+
+  useEffect(() => {
+    fetchEquipments();
+  }, []);
+
+  const fetchEquipments = () => {
+    api.get('/equipements')
+      .then(res => setEquipments(res.data))
+      .catch(err => {
+        console.error('Erreur lors du chargement des équipements:', err);
+        toast({
+          title: t('error'),
+          description: t('equipment_load_fail'),
+        });
+      })
+      .finally(() => setLoading(false));
   };
+
+  const handleAddEquipment = () => {
+    navigate('/equipements/create');
+  };
+
+  const handleEdit = (id: number) => {
+    navigate(`/equipements/edit/${id}`);
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm(t('delete_confirm_equipment'))) return;
+    try {
+      await api.delete(`/equipements/${id}`);
+      toast({ title: t('equipment_deleted') });
+      fetchEquipments();
+    } catch (err) {
+      toast({ title: t('error'), description: t('equipment_delete_fail') });
+    }
+  };
+
+  const equipmentsColumns = [
+    { header: 'ID', accessorKey: 'id' as keyof Equipment },
+    { header: t('type'), accessorKey: 'type' as keyof Equipment },
+    {
+      header: t('actions'),
+      accessorKey: 'actions',
+      cell: (item: Equipment) => (
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => handleEdit(item.id)}>{t('edit')}</Button>
+          <Button variant="destructive" size="sm" onClick={() => handleDelete(item.id)}>{t('delete')}</Button>
+        </div>
+      ),
+    },
+  ];
 
   return (
     <div className="space-y-6">
-      <DataTable 
-        data={equipmentsData} 
-        columns={equipmentsColumns} 
-        title="Équipements" 
+      <DataTable
+        data={equipments}
+        columns={equipmentsColumns}
+        title={t('equipments')}
         onAdd={handleAddEquipment}
+        isLoading={loading}
       />
     </div>
   );

@@ -1,82 +1,93 @@
-
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { DataTable } from '@/components/common/DataTable';
 import { toast } from '@/components/ui/use-toast';
+import axios from '@/lib/axios';
+import { Button } from '@/components/ui/button';
+import { useTranslation } from 'react-i18next';
 
 interface Client {
-  id: string;
-  name: string;
+  id: number;
+  companyName: string;
   contact: string;
+  contactNumber: string;
   email: string;
-  phone: string;
   address: string;
 }
 
-const clientsData: Client[] = [
-  {
-    id: '1',
-    name: 'Entreprise Martin',
-    contact: 'Jean Martin',
-    email: 'jean.martin@example.com',
-    phone: '+33 1 23 45 67 89',
-    address: 'Paris, FR',
-  },
-  {
-    id: '2',
-    name: 'Société Bernard',
-    contact: 'Marie Bernard',
-    email: 'marie.bernard@example.com',
-    phone: '+33 1 98 76 54 32',
-    address: 'Lyon, FR',
-  },
-  {
-    id: '3',
-    name: 'Groupe Thomas',
-    contact: 'Pierre Thomas',
-    email: 'pierre.thomas@example.com',
-    phone: '+33 6 12 34 56 78',
-    address: 'Marseille, FR',
-  },
-  {
-    id: '4',
-    name: 'Durand & Fils',
-    contact: 'Sophie Durand',
-    email: 'sophie.durand@example.com',
-    phone: '+33 4 56 78 90 12',
-    address: 'Bordeaux, FR',
-  },
-  {
-    id: '5',
-    name: 'Petit Import/Export',
-    contact: 'Lucas Petit',
-    email: 'lucas.petit@example.com',
-    phone: '+33 7 89 01 23 45',
-    address: 'Lille, FR',
-  },
-];
-
-const clientsColumns = [
-  { header: 'Nom', accessorKey: 'name' as keyof Client },
-  { header: 'Contact', accessorKey: 'contact' as keyof Client },
-  { header: 'Email', accessorKey: 'email' as keyof Client },
-  { header: 'Téléphone', accessorKey: 'phone' as keyof Client },
-  { header: 'Adresse', accessorKey: 'address' as keyof Client },
-];
-
 export default function Clients() {
-  const handleAddClient = () => {
-    toast({
-      title: "Nouveau client",
-      description: "Fonctionnalité à implémenter",
-    });
+  const [clients, setClients] = useState<Client[]>([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+
+  const fetchClients = () => {
+    setLoading(true);
+    axios.get('/clients')
+      .then(res => setClients(res.data))
+      .catch(err => {
+        toast({
+          title: t('error_loading'),
+          description: t('clients_fetch_fail'),
+        });
+        console.error(err);
+      })
+      .finally(() => setLoading(false));
   };
+
+  useEffect(() => {
+    fetchClients();
+  }, []);
+
+  const handleDelete = async (id: number) => {
+    if (!confirm(t('delete_confirm_client'))) return;
+    try {
+      await axios.delete(`/clients/${id}`);
+      toast({ title: t('client_deleted') });
+      fetchClients();
+    } catch (error) {
+      toast({ title: t('error'), description: t('client_delete_fail') });
+      console.error(error);
+    }
+  };
+
+  const handleEdit = (id: number) => {
+    navigate(`/clients/edit/${id}`);
+  };
+
+  const handleAddClient = () => {
+    navigate('/clients/create');
+  };
+
+  const clientsColumns = [
+    { header: t('companyName'), accessorKey: 'companyName' },
+    { header: t('contact'), accessorKey: 'contact' },
+    { header: t('email'), accessorKey: 'email' },
+    { header: t('phone'), accessorKey: 'contactNumber' },
+    { header: t('address'), accessorKey: 'address' },
+    {
+      header: t('actions'),
+      cell: (client: Client) => (
+        <div className="flex gap-2">
+          <Button type="submit" className="bg-blue-600 text-white" onClick={() => handleEdit(client.id)}>
+            {t('edit')}
+          </Button>
+          <Button variant="destructive" onClick={() => handleDelete(client.id)}>
+            {t('delete')}
+          </Button>
+        </div>
+      )
+    }
+  ];
 
   return (
     <div className="space-y-6">
       <DataTable 
-        data={clientsData} 
+        data={clients} 
         columns={clientsColumns} 
-        title="Clients" 
+        title={t('clients')} 
         onAdd={handleAddClient}
+        isLoading={loading}
       />
     </div>
   );

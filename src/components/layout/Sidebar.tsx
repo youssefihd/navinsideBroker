@@ -8,9 +8,12 @@ import {
   Truck, 
   Box, 
   Briefcase, 
-  Search
+  Search,
+   DollarSign
 } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+import { Mail } from 'lucide-react';
+import { CheckCheck } from 'lucide-react';
+
 
 interface SidebarLinkProps {
   to: string;
@@ -22,6 +25,8 @@ interface SidebarLinkProps {
 
 const SidebarLink = ({ to, icon: Icon, title, isCollapsed, isActive }: SidebarLinkProps) => {
   return (
+    
+    
     <Link
       to={to}
       className={cn(
@@ -31,7 +36,7 @@ const SidebarLink = ({ to, icon: Icon, title, isCollapsed, isActive }: SidebarLi
           : 'text-muted-foreground hover:bg-logistics-50 hover:text-foreground'
       )}
     >
-      <Icon size={20} />
+  <Icon size={20} />
       <span className={cn('transition-opacity', 
         isCollapsed ? 'opacity-0 hidden' : 'opacity-100'
       )}>
@@ -52,28 +57,38 @@ export function Sidebar() {
     { to: '/consignees', title: 'Consignees', icon: Briefcase },
     { to: '/equipments', title: 'Equipments', icon: Package },
     { to: '/shippers', title: 'Shippers', icon: Package },
+    { to: '/users', title: 'Users', icon: Users },
+    { to: '/emails', title: 'Emails', icon: Mail },
+    {
+  to: "/accounting",
+  title: "Accounting",
+  icon:  DollarSign, // Lucide or any other icon system
+},   {
+  to: "/check",
+  title: "Check List",
+  icon:  CheckCheck, // Lucide or any other icon system
+}
   ];
 
   return (
-    <aside 
-      className={cn(
-        "h-screen fixed left-0 top-0 z-30 flex flex-col border-r bg-white transition-all duration-300 ease-in-out",
-        isCollapsed ? "w-[60px]" : "w-[280px]"
-      )}
-      onMouseEnter={() => setIsCollapsed(false)}
-      onMouseLeave={() => setIsCollapsed(true)}
-    >
-      <div className="flex h-14 items-center border-b px-3 py-4">
-        <Link to="/" className="flex items-center gap-2">
-          <Truck className="h-6 w-6 text-logistics-600" />
-          <span className={cn(
-            "font-semibold text-lg transition-opacity", 
-            isCollapsed ? "opacity-0 hidden" : "opacity-100"
-          )}>
-            LogisTMS
-          </span>
-        </Link>
-      </div>
+  <aside 
+    className={cn(
+      "h-screen fixed left-0 top-0 z-30 flex flex-col border-r bg-white transition-all duration-300 ease-in-out",
+      isCollapsed ? "w-[80px]" : "w-[280px]"
+    )}
+    onMouseEnter={() => setIsCollapsed(false)}
+    onMouseLeave={() => setIsCollapsed(true)}
+  >
+    <div className="flex h-14 w-auto items-center border-b px-3 py-4">
+      <Link to="/" className="flex items-center w-full justify-center overflow-hidden">
+        <img
+          src="/navinside.jpg"
+          alt="NavInside"
+          className="h-11 w-auto transition-all duration-300"
+        />
+      </Link>
+    </div>
+
       <div className="flex-1 overflow-auto py-2 px-3">
         <nav className="grid gap-1 px-2 group-[[data-collapsed=true]]:justify-center">
           {sidebarLinks.map((link) => (

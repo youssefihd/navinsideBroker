@@ -1,82 +1,98 @@
-
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { DataTable } from '@/components/common/DataTable';
 import { toast } from '@/components/ui/use-toast';
+import { Button } from '@/components/ui/button';
+import api from '@/lib/axios';
 
 interface Shipper {
-  id: string;
-  name: string;
+  id: number;
+  companyName: string;
   contact: string;
-  email: string;
-  phone: string;
   address: string;
+  postalCode: string;
+  province: string;
+  country: string;
+  city: string;
+  phoneNumber: string;
 }
 
-const shippersData: Shipper[] = [
-  {
-    id: '1',
-    name: 'Production Nationale',
-    contact: 'Antoine Lefèvre',
-    email: 'a.lefevre@prod-nationale.fr',
-    phone: '+33 1 23 45 67 89',
-    address: 'Paris, FR',
-  },
-  {
-    id: '2',
-    name: 'Industrie du Sud',
-    contact: 'Céline Durand',
-    email: 'c.durand@industrie-sud.fr',
-    phone: '+33 4 98 76 54 32',
-    address: 'Marseille, FR',
-  },
-  {
-    id: '3',
-    name: 'Agro Export',
-    contact: 'Thomas Bernard',
-    email: 't.bernard@agroexport.com',
-    phone: '+33 5 11 22 33 44',
-    address: 'Bordeaux, FR',
-  },
-  {
-    id: '4',
-    name: 'Tech Logistics',
-    contact: 'Julie Martin',
-    email: 'j.martin@techlogistics.fr',
-    phone: '+33 1 44 55 66 77',
-    address: 'Paris, FR',
-  },
-  {
-    id: '5',
-    name: 'Nord Industries',
-    contact: 'Marc Petit',
-    email: 'm.petit@nordindustries.fr',
-    phone: '+33 3 88 99 77 66',
-    address: 'Lille, FR',
-  },
-];
-
-const shippersColumns = [
-  { header: 'Nom', accessorKey: 'name' as keyof Shipper },
-  { header: 'Contact', accessorKey: 'contact' as keyof Shipper },
-  { header: 'Email', accessorKey: 'email' as keyof Shipper },
-  { header: 'Téléphone', accessorKey: 'phone' as keyof Shipper },
-  { header: 'Adresse', accessorKey: 'address' as keyof Shipper },
-];
-
 export default function Shippers() {
-  const handleAddShipper = () => {
-    toast({
-      title: "Nouvel expéditeur",
-      description: "Fonctionnalité à implémenter",
-    });
+  const [shippers, setShippers] = useState<Shipper[]>([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+
+  useEffect(() => {
+    fetchShippers();
+  }, []);
+
+  const fetchShippers = () => {
+    api.get('/shippers')
+      .then(res => setShippers(res.data))
+      .catch(err => {
+        console.error('Erreur lors du chargement des expéditeurs:', err);
+        toast({
+          title: t('error'),
+          description: t('shippers_fetch_fail'),
+        });
+      })
+      .finally(() => setLoading(false));
   };
-  
+
+  const handleAddShipper = () => {
+    navigate('/shippers/create');
+  };
+
+  const handleEdit = (id: number) => {
+    navigate(`/shippers/edit/${id}`);
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm(t('delete_confirm'))) return;
+    try {
+      await api.delete(`/shippers/${id}`);
+      toast({ title: t('delete_success') });
+      fetchShippers();
+    } catch (err) {
+      toast({ title: t('error'), description: t('delete_fail') });
+    }
+  };
+
+  const shippersColumns = [
+    { header: t('company_name'), accessorKey: 'companyName' as keyof Shipper },
+    { header: t('contact'), accessorKey: 'contact' as keyof Shipper },
+    { header: t('phone'), accessorKey: 'phoneNumber' as keyof Shipper },
+    { header: t('address'), accessorKey: 'address' as keyof Shipper },
+    { header: t('city'), accessorKey: 'city' as keyof Shipper },
+    { header: t('postal_code'), accessorKey: 'postalCode' as keyof Shipper },
+    { header: t('province'), accessorKey: 'province' as keyof Shipper },
+    { header: t('country'), accessorKey: 'country' as keyof Shipper },
+    {
+      header: t('actions'),
+      accessorKey: 'actions',
+      cell: (item: Shipper) => (
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => handleEdit(item.id)}>
+            {t('edit')}
+          </Button>
+          <Button variant="destructive" size="sm" onClick={() => handleDelete(item.id)}>
+            {t('delete')}
+          </Button>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <div className="space-y-6">
       <DataTable 
-        data={shippersData} 
+        data={shippers} 
         columns={shippersColumns} 
-        title="Expéditeurs" 
+        title={t('shippers')} 
         onAdd={handleAddShipper}
+        isLoading={loading}
       />
     </div>
   );
