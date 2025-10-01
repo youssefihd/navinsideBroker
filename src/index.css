@@ -99,3 +99,72 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Make table headers sticky inside any scrollable .table-sticky wrapper */
+.table-sticky thead {
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 10;
+}
+
+
+/* Sticky table headers inside scrollable wrappers */
+.table-sticky thead {
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 10;
+}
+
+/* Make tables fit without horizontal scroll (scoped via utility selectors) */
+.acc-compact table { table-layout: fixed; width: 100%; }
+.acc-compact th, .acc-compact td { padding: 8px 10px; font-size: 13px; vertical-align: middle; }
+.acc-compact th { font-size: 12px; line-height: 1.1; }
+.acc-compact td { white-space: normal; word-break: break-word; }
+.acc-compact .num { text-align: right; }
+.acc-compact .muted { color: #6b7280; font-size: 11px; } /* slate-500 */
+
+/* Modern, subtle, theme-matched scrollbar */
+.nice-scrollbar {
+  scrollbar-width: thin;                       /* Firefox */
+  scrollbar-color: rgba(99,102,241,.35) transparent;
+  scrollbar-gutter: stable both-edges;
+}
+
+/* WebKit (Chrome/Edge/Safari) */
+.nice-scrollbar::-webkit-scrollbar {
+  width: 10px;
+}
+
+.nice-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 9999px;
+}
+
+.nice-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(14,165,233,.28), rgba(139,92,246,.28)); /* sky → violet */
+  border-radius: 9999px;
+  border: 3px solid transparent;              /* hollow look */
+  background-clip: content-box;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.5);
+}
+
+.nice-scrollbar:hover::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(14,165,233,.5), rgba(139,92,246,.5));
+}
+
+.nice-scrollbar::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(180deg, rgba(14,165,233,.7), rgba(139,92,246,.7));
+}
+
+.nice-scrollbar::-webkit-scrollbar-track:hover {
+  background: rgba(2,6,23,.04);               /* faint track on hover */
+  border-radius: 9999px;
+}
+
+
+@keyframes task-sheen {
+  0%   { transform: translateX(-120%) rotate(0.001deg); }
+  100% { transform: translateX(120%)  rotate(0.001deg); }
+}
