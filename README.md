@@ -69,5 +69,6 @@ Simply open [Lovable](https://lovable.dev/projects/f15b16c2-cb81-4b3d-bc65-26ca7
 Yes, you can!
 
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+Commit directly to the main branch → Commit changes.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
